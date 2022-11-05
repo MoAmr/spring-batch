@@ -16,5 +16,5 @@ A guide to creating a simple Spring Batch application.
 then navigate to the directory that contains the file and execute: ```./run_delivery_job.sh```
 
 ## Conditional Flow:
-![ScreenShot](/images/Job Conditional Flow.png?)
+<img width="683" alt="Job Conditional Flow" src="https://user-images.githubusercontent.com/12289319/200139423-bf74be69-32bf-495c-b134-815c86c1af48.png">
 
