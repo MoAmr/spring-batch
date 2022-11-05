@@ -14,4 +14,7 @@ A guide to creating a simple Spring Batch application.
 * I have added a bash script to combine the previous steps (packaging and running the jar file), you can find the script named as:
 **Note: if you encountered permission denied error when trying to execute the bash script, then make sure you have granted write access to the script**, through executing the following command: ```sudo chmod 755 run_delivery_job.sh```
 then navigate to the directory that contains the file and execute: ```./run_delivery_job.sh```
-  
+
+## Conditional Flow:
+![ScreenShot](/images/Job Conditional Flow.png?)
+
