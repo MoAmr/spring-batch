@@ -2,6 +2,7 @@ package com.springbatch;
 
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
+import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
@@ -30,6 +31,11 @@ public class SpringBatchApplication {
     @Bean
     public JobExecutionDecider receiptDecider() {
         return new ReceiptDecider();
+    }
+
+    @Bean
+    public StepExecutionListener selectFlowerListener() {
+        return new FlowersSelectionStepExecutionListener();
     }
 
     @Bean
@@ -109,6 +115,41 @@ public class SpringBatchApplication {
                             .from(receiptDecider()).on("IN_CORRECT").to(refundStep())
                     .from(decider())
                         .on("NOT_PRESENT").to(leaveAtDoorStep())
+                .end()
+                .build();
+    }
+
+    @Bean
+    public Step selectFlowersStep() {
+        return this.stepBuilderFactory.get("selectFlowersStep").tasklet((stepContribution, chunkContext) -> {
+            System.out.println("Gathering flowers for order.");
+            return RepeatStatus.FINISHED;
+        }).listener(selectFlowerListener()).build();
+    }
+
+    @Bean
+    public Step removeThornsStep() {
+        return this.stepBuilderFactory.get("removeThornsStep").tasklet((stepContribution, chunkContext) -> {
+            System.out.println("Remove thorns from roses.");
+            return RepeatStatus.FINISHED;
+        }).build();
+    }
+
+    @Bean
+    public Step arrangeFlowersStep() {
+        return this.stepBuilderFactory.get("arrangeFlowersStep").tasklet((stepContribution, chunkContext) -> {
+            System.out.println("Arranging flowers for order.");
+            return RepeatStatus.FINISHED;
+        }).build();
+    }
+
+    @Bean
+    public Job prepareFlowers() {
+        return this.jobBuilderFactory.get("prepareFlowersJob")
+                .start(selectFlowersStep())
+                    .on("TRIM_REQUIRED").to(removeThornsStep()).next(arrangeFlowersStep())
+                .from(selectFlowersStep())
+                    .on("NO_TRIM_REQUIRED").to(arrangeFlowersStep())
                 .end()
                 .build();
     }
