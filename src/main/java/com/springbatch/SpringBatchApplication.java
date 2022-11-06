@@ -101,7 +101,7 @@ public class SpringBatchApplication {
         return this.jobBuilderFactory.get("deliverPackageJob")
                 .start(packageItemStep())
                 .next(driveToAddressStep())
-                    .on("FAILED").to(storePackageStep())
+                    .on("FAILED").fail()
                 .from(driveToAddressStep())
                     .on("*").to(decider())
                         .on("PRESENT").to(givePackageToCustomerStep())
