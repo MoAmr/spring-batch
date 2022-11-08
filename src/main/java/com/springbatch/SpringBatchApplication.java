@@ -37,6 +37,29 @@ public class SpringBatchApplication {
     }
 
     @Bean
+    public StepExecutionListener selectFlowerListener() {
+        return new FlowersSelectionStepExecutionListener();
+    }
+
+    @Bean
+    public Step nestedBillingJobStep() {
+        return this.stepBuilderFactory.get("nestedBillingJobStep").job(billingJob()).build();
+    }
+
+    @Bean
+    public Step sendInvoiceStep() {
+        return this.stepBuilderFactory.get("invoiceStep").tasklet((stepContribution, chunkContext) -> {
+            System.out.println("Invoice is sent to the customer.");
+            return RepeatStatus.FINISHED;
+        }).build();
+    }
+
+    @Bean
+    public Job billingJob() {
+        return this.jobBuilderFactory.get("billingJob").start(sendInvoiceStep()).build();
+    }
+
+    @Bean
     public Flow deliveryFlow() {
         return new FlowBuilder<SimpleFlow>("deliveryFlow").start(driveToAddressStep())
                     .on("FAILED").fail()
@@ -47,11 +70,6 @@ public class SpringBatchApplication {
                             .from(receiptDecider()).on("IN_CORRECT").to(refundStep())
                     .from(decider())
                         .on("NOT_PRESENT").to(leaveAtDoorStep()).build();
-    }
-
-    @Bean
-    public StepExecutionListener selectFlowerListener() {
-        return new FlowersSelectionStepExecutionListener();
     }
 
     @Bean
@@ -123,6 +141,7 @@ public class SpringBatchApplication {
         return this.jobBuilderFactory.get("deliverPackageJob")
                 .start(packageItemStep())
                 .on("*").to(deliveryFlow())
+                .next(nestedBillingJobStep())
                 .end()
                 .build();
     }
