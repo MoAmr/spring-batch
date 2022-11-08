@@ -1,14 +1,3 @@
-<!-- TOC -->
-
-* [Spring Batch](#spring-batch)
-    * [Important Notes:](#important-notes-)
-    * [Important Maven Commands:](#important-maven-commands-)
-    * [Conditional Flow:](#conditional-flow-)
-    * [Deliver Package Job Flow:](#deliver-package-job-flow-)
-    * [Listeners:](#listeners-)
-
-<!-- TOC -->
-
 # Spring Batch
 
 * A guide to creating a simple Spring Batch application.
@@ -70,3 +59,11 @@
   you encountered permission denied error when trying to execute the bash script, then make sure you have granted write
   access to the script, through executing the following command: ```sudo chmod 755 run_flowers_job.sh``` then navigate
   to the directory that contains the file and execute: ```./run_flowers_job.sh roses```
+
+### Parallel Flows:
+
+<img width="596" alt="Parallel Flow" src="https://user-images.githubusercontent.com/12289319/200685698-be07a29c-ccfe-4197-b462-a28445677e77.png">
+
+* We are going to execute the Delivery Flow and the Billing Flow in parallel using a split.
+* Using the split, we are able to deviate from sequential job execution.
+* It's important to remember that splits are used with flows as opposed to steps or jobs. And using this feature within Spring Batch, you can simultaneously execute different job logic.  
