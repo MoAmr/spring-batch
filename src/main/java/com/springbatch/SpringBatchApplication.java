@@ -1,5 +1,11 @@
 package com.springbatch;
 
+import com.springbatch.itemReaders.SimpleItemReader;
+import com.springbatch.jobDeciders.DeliveryDecider;
+import com.springbatch.jobDeciders.ReceiptDecider;
+import com.springbatch.listeners.FlowersSelectionStepExecutionListener;
+import com.springbatch.mappers.OrderFieldSetMapper;
+import com.springbatch.models.Order;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.StepExecutionListener;
@@ -12,11 +18,15 @@ import org.springframework.batch.core.job.flow.JobExecutionDecider;
 import org.springframework.batch.core.job.flow.support.SimpleFlow;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.item.file.FlatFileItemReader;
+import org.springframework.batch.item.file.mapping.DefaultLineMapper;
+import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 
 import java.util.List;
@@ -24,6 +34,8 @@ import java.util.List;
 @SpringBootApplication
 @EnableBatchProcessing
 public class SpringBatchApplication {
+
+    public static String[] tokens = new String[] {"order_id", "first_name", "last_name", "email", "cost", "item_id", "item_name", "ship_date"};
 
     @Autowired
     public JobBuilderFactory jobBuilderFactory;
@@ -193,18 +205,32 @@ public class SpringBatchApplication {
     }
 
     @Bean
-    public ItemReader<String> itemReader() {
-        return new SimpleItemReader();
+    public ItemReader<Order> itemReader() {
+        FlatFileItemReader<Order> itemReader = new FlatFileItemReader<Order>();
+        // skips first line because it contains the headers as opposed to actual data that we'd like to process.
+        itemReader.setLinesToSkip(1);
+        itemReader.setResource(new FileSystemResource("shipped_orders.csv"));
+
+        DefaultLineMapper<Order> lineMapper = new DefaultLineMapper<Order>();
+        DelimitedLineTokenizer tokenizer = new DelimitedLineTokenizer();
+        tokenizer.setNames(tokens);
+
+        lineMapper.setLineTokenizer(tokenizer);
+
+        lineMapper.setFieldSetMapper(new OrderFieldSetMapper());
+
+        itemReader.setLineMapper(lineMapper);
+        return itemReader;
     }
 
     @Bean
     public Step chunkBasedStep() {
         return this.stepBuilderFactory.get("chunkBasedStep")
-                .<String, String>chunk(3)
+                .<Order, Order>chunk(3)
                 .reader(itemReader())
-                .writer(new ItemWriter<String>() {
+                .writer(new ItemWriter<Order>() {
                     @Override
-                    public void write(List<? extends String> items) throws Exception {
+                    public void write(List<? extends Order> items) throws Exception {
                         System.out.println(String.format("Received list of size: %s", items.size()));
                         items.forEach(System.out::println);
                     }
