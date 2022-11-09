@@ -10,12 +10,16 @@ import org.springframework.batch.core.job.builder.FlowBuilder;
 import org.springframework.batch.core.job.flow.Flow;
 import org.springframework.batch.core.job.flow.JobExecutionDecider;
 import org.springframework.batch.core.job.flow.support.SimpleFlow;
+import org.springframework.batch.item.ItemReader;
+import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
+
+import java.util.List;
 
 @SpringBootApplication
 @EnableBatchProcessing
@@ -185,6 +189,32 @@ public class SpringBatchApplication {
                     .on("NO_TRIM_REQUIRED").to(arrangeFlowersStep())
                 .from(arrangeFlowersStep()).on("*").to(deliveryFlow())
                 .end()
+                .build();
+    }
+
+    @Bean
+    public ItemReader<String> itemReader() {
+        return new SimpleItemReader();
+    }
+
+    @Bean
+    public Step chunkBasedStep() {
+        return this.stepBuilderFactory.get("chunkBasedStep")
+                .<String, String>chunk(3)
+                .reader(itemReader())
+                .writer(new ItemWriter<String>() {
+                    @Override
+                    public void write(List<? extends String> items) throws Exception {
+                        System.out.println(String.format("Received list of size: %s", items.size()));
+                        items.forEach(System.out::println);
+                    }
+                }).build();
+    }
+
+    @Bean
+    public Job chunkBasedJob() {
+        return this.jobBuilderFactory.get("chunkBasedJob")
+                .start(chunkBasedStep())
                 .build();
     }
 
