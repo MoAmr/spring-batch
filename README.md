@@ -83,3 +83,8 @@
 * The framework provides several out-of-the-box implementations for reading from common data stores such as databases, files, and message queues.
 
 <img width="702" alt="Available ItemReaders" src="https://user-images.githubusercontent.com/12289319/200952330-b99af70b-f567-4e8e-ada3-fc0234c97c5f.png">
+
+* I have added new bash script file named **run_job.sh** to run **chunkBasedJob** to read chunks of items of a list of strings.
+* Note: if you encountered permission denied error when trying to execute the bash script, then make sure you have granted write
+  access to the script, through executing the following command: ```sudo chmod 755 run_job.sh``` then navigate
+  to the directory that contains the file and execute: ```./run_job.sh```
