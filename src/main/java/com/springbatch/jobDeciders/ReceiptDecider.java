@@ -1,4 +1,4 @@
-package com.springbatch;
+package com.springbatch.jobDeciders;
 
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepExecution;

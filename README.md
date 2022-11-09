@@ -88,3 +88,7 @@
 * Note: if you encountered permission denied error when trying to execute the bash script, then make sure you have granted write
   access to the script, through executing the following command: ```sudo chmod 755 run_job.sh``` then navigate
   to the directory that contains the file and execute: ```./run_job.sh```
+
+#### Reading Flat Files:
+
+* Using the line mapper (i.e. **DefaultLineMapper**) we can instruct the flat file item reader on how to parse out the different lines of data withing the CSV, and then how to take those parsed tokens and map them to our order pojo.
