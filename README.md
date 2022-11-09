@@ -66,4 +66,20 @@
 
 * We are going to execute the Delivery Flow and the Billing Flow in parallel using a split.
 * Using the split, we are able to deviate from sequential job execution.
-* It's important to remember that splits are used with flows as opposed to steps or jobs. And using this feature within Spring Batch, you can simultaneously execute different job logic.  
+* It's important to remember that splits are used with flows as opposed to steps or jobs. And using this feature within Spring Batch, you can simultaneously execute different job logic. 
+
+## Chunk-Based Step:
+
+<img width="725" alt="Chunk-Based Step" src="https://user-images.githubusercontent.com/12289319/200947887-0db1a7cd-856a-45ad-b76a-a7fc043257a9.png">
+
+* The generic logic of chunk-based processing is to read items from a data store using an **ItemReader**, transform the items using the **ItemProcessor**, and then we write chunks of the data to another data store within a transaction using the **ItemWriter**
+* When reading, processing, and writing the items, we perform these operations on subsets of the data referred to as chunks.
+* Our step will continue reading, processing, and writing chunks until the items in the data store are exhausted.
+
+### ItemReader:
+
+* Spring Batch provides an ItemReader interface with a single method named **read**.
+* Implementations of the ItemReader interface retrieve data from a data store **one item at a time for processing**.
+* The framework provides several out-of-the-box implementations for reading from common data stores such as databases, files, and message queues.
+
+<img width="702" alt="Available ItemReaders" src="https://user-images.githubusercontent.com/12289319/200952330-b99af70b-f567-4e8e-ada3-fc0234c97c5f.png">
