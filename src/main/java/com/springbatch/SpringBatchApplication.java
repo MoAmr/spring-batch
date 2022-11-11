@@ -5,6 +5,7 @@ import com.springbatch.jobDeciders.DeliveryDecider;
 import com.springbatch.jobDeciders.ReceiptDecider;
 import com.springbatch.listeners.FlowersSelectionStepExecutionListener;
 import com.springbatch.mappers.OrderFieldSetMapper;
+import com.springbatch.mappers.OrderRowMapper;
 import com.springbatch.models.Order;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -18,6 +19,7 @@ import org.springframework.batch.core.job.flow.JobExecutionDecider;
 import org.springframework.batch.core.job.flow.support.SimpleFlow;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.item.database.builder.JdbcCursorItemReaderBuilder;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.mapping.DefaultLineMapper;
 import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
@@ -29,6 +31,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 
+import javax.sql.DataSource;
 import java.util.List;
 
 @SpringBootApplication
@@ -37,11 +40,18 @@ public class SpringBatchApplication {
 
     public static String[] tokens = new String[] {"order_id", "first_name", "last_name", "email", "cost", "item_id", "item_name", "ship_date"};
 
+    public static String ORDER_SQL = "select order_id, first_name, last_name, "
+            + "email, cost, item_id, item_name, ship_date "
+            + "from SHIPPED_ORDER order by order_id";
+
     @Autowired
     public JobBuilderFactory jobBuilderFactory;
 
     @Autowired
     public StepBuilderFactory stepBuilderFactory;
+
+    @Autowired
+    public DataSource dataSource;
 
     @Bean
     public JobExecutionDecider decider() {
@@ -204,7 +214,8 @@ public class SpringBatchApplication {
                 .build();
     }
 
-    @Bean
+    // FlatFileItemReader
+    /*@Bean
     public ItemReader<Order> itemReader() {
         FlatFileItemReader<Order> itemReader = new FlatFileItemReader<Order>();
         // skips first line because it contains the headers as opposed to actual data that we'd like to process.
@@ -221,6 +232,16 @@ public class SpringBatchApplication {
 
         itemReader.setLineMapper(lineMapper);
         return itemReader;
+    }*/
+
+    @Bean
+    public ItemReader<Order> itemReader() {
+        return new JdbcCursorItemReaderBuilder<Order>()
+                .dataSource(dataSource)
+                .name("jdbcCursorItemReader")
+                .sql(ORDER_SQL)
+                .rowMapper(new OrderRowMapper())
+                .build();
     }
 
     @Bean

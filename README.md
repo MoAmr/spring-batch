@@ -92,3 +92,10 @@
 #### Reading Flat Files:
 
 * Using the line mapper (i.e. **DefaultLineMapper**) we can instruct the flat file item reader on how to parse out the different lines of data withing the CSV, and then how to take those parsed tokens and map them to our order pojo.
+
+#### Reading from Databases:
+
+* **RowMapper** is used to map the rows from the database to our POJO.
+* When building RowMapper, instead of taking the **FieldSet** and the fields returned from a CSV, we are working with a **ResultSet**.
+* The **JdbcCursorItemReader** is an effective way to read from a database, however, **it has one big drawback, it's not thread-safe**.
+* So if you plan to **execute your job with multiple threads**, there's a different item reader implementation that we'll need to use, it's the **JdbcPagingItemReader**.
