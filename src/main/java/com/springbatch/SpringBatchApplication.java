@@ -19,7 +19,10 @@ import org.springframework.batch.core.job.flow.JobExecutionDecider;
 import org.springframework.batch.core.job.flow.support.SimpleFlow;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.item.database.PagingQueryProvider;
 import org.springframework.batch.item.database.builder.JdbcCursorItemReaderBuilder;
+import org.springframework.batch.item.database.builder.JdbcPagingItemReaderBuilder;
+import org.springframework.batch.item.database.support.SqlPagingQueryProviderFactoryBean;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.mapping.DefaultLineMapper;
 import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
@@ -40,8 +43,7 @@ public class SpringBatchApplication {
 
     public static String[] tokens = new String[] {"order_id", "first_name", "last_name", "email", "cost", "item_id", "item_name", "ship_date"};
 
-    public static String ORDER_SQL = "select order_id, first_name, last_name, "
-            + "email, cost, item_id, item_name, ship_date "
+    public static String ORDER_SQL = "select order_id, first_name, last_name, email, cost, item_id, item_name, ship_date "
             + "from SHIPPED_ORDER order by order_id";
 
     @Autowired
@@ -234,7 +236,8 @@ public class SpringBatchApplication {
         return itemReader;
     }*/
 
-    @Bean
+    // JdbcCursorItemReaderBuilder
+    /*@Bean
     public ItemReader<Order> itemReader() {
         return new JdbcCursorItemReaderBuilder<Order>()
                 .dataSource(dataSource)
@@ -242,12 +245,33 @@ public class SpringBatchApplication {
                 .sql(ORDER_SQL)
                 .rowMapper(new OrderRowMapper())
                 .build();
+    }*/
+
+    @Bean
+    public PagingQueryProvider queryProvider() throws Exception {
+        SqlPagingQueryProviderFactoryBean factory = new SqlPagingQueryProviderFactoryBean();
+        factory.setSelectClause("select order_id, first_name, last_name, email, cost, item_id, item_name, ship_date");
+        factory.setFromClause("from SHIPPED_ORDER");
+        factory.setSortKey("order_id");
+        factory.setDataSource(dataSource);
+        return factory.getObject();
     }
 
     @Bean
-    public Step chunkBasedStep() {
+    public ItemReader<Order> itemReader() throws Exception {
+        return new JdbcPagingItemReaderBuilder<Order>()
+                .dataSource(dataSource)
+                .name("jdbcCursorItemReader")
+                .queryProvider(queryProvider())
+                .rowMapper(new OrderRowMapper())
+                .pageSize(10)
+                .build();
+    }
+
+    @Bean
+    public Step chunkBasedStep() throws Exception {
         return this.stepBuilderFactory.get("chunkBasedStep")
-                .<Order, Order>chunk(3)
+                .<Order, Order>chunk(10)
                 .reader(itemReader())
                 .writer(new ItemWriter<Order>() {
                     @Override
@@ -259,7 +283,7 @@ public class SpringBatchApplication {
     }
 
     @Bean
-    public Job chunkBasedJob() {
+    public Job chunkBasedJob() throws Exception {
         return this.jobBuilderFactory.get("chunkBasedJob")
                 .start(chunkBasedStep())
                 .build();

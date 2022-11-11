@@ -99,3 +99,5 @@
 * When building RowMapper, instead of taking the **FieldSet** and the fields returned from a CSV, we are working with a **ResultSet**.
 * The **JdbcCursorItemReader** is an effective way to read from a database, however, **it has one big drawback, it's not thread-safe**.
 * So if you plan to **execute your job with multiple threads**, there's a different item reader implementation that we'll need to use, it's the **JdbcPagingItemReader**.
+* **PageSize** in JdbcPagingItemReader specifies how many items are in a page. so that when this item reader is reading from the database, it reads that amount of items.
+* It's important that our **PageSize also matches our ChunkSize**.
