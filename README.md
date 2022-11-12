@@ -117,9 +117,30 @@
 * One of the weaknesses of this approach is the fact that we are using the ordinal position when we set these parameters, it's very easy to get the order off and to incorrectly set the parameters within the insert statement.
 * When adding **beanMapped** strategy into the **JdbcBatchItemWriterBuilder**, it causes a bean property item sequel parameter source provider to be registered, in a nutshell, what it does, it's going to take those name parameters and look for corresponding field on a pojo, and when it finds it, it's going to use the value of that field to set the parameter within our insert statement. So, it's a lot easier than using those original than using those ordinal positions, this is much more efficient and much less error-prone.
 
-#### JsonFileItemWriterBuilder:
+#### JsonFileItemWriter:
 
 * It's capable of writing JSON to a file on the file system.
 * We use the **JacksonJsonObjectMarshaller** as JSON object marshaller.
 * Jackson is a serialization and deserialization framework for working with JSON in Java, it's able to take a JSON string and turn it into a Java object, and the java object can be turned into a JSON string without much coding being written.
 
+### ItemProcessor:
+
+* Standard interface for interjecting **custom business logic** that occurs **between the ItemReader and ItemWriter**.
+* This allows developers to address custom batch processing logic within chunk-based processing. 
+* Typical use cases for the **ItemProcessor** includes: 
+  * Transformation.
+  * Validation.
+  * Filtration.
+* The **ItemProcessor** interface contains a single **process** method that must be implemented.
+* It's important to note the **type arguments**, these represent the input and output of the processor.
+* In some cases, you may need to include the multiple processors within a chunk-based step.
+* Spring Batch allows processors to be **chained** using a **composite ItemProcessor**.
+* It's important to reiterate that an **ItemProcessor is not a required component** within a chunk-based step.
+
+#### BeanValidatingItemProcessor:
+
+* This is a processor that Spring Batch provides out of the box.
+* We can use it to validate the items read into a step.
+* To determine if an item is valid, the **BeanValidatingItemProcessor** consults JSR 380 validation annotations placed on a bean.
+* On this processor, we are able to set whether the processor will **filter** or not, in our case, we would like to filter, we are going to continue processing, we are just **not going to process those items that cannot pass the validation enforced by this item processor**, so we will not throw an error, we will continue processing.
+* The alternative is for the processor to throw an error when there is a validation exception.

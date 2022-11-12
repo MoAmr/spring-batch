@@ -1,10 +1,8 @@
 package com.springbatch;
 
-import com.springbatch.itemReaders.SimpleItemReader;
 import com.springbatch.jobDeciders.DeliveryDecider;
 import com.springbatch.jobDeciders.ReceiptDecider;
 import com.springbatch.listeners.FlowersSelectionStepExecutionListener;
-import com.springbatch.mappers.OrderFieldSetMapper;
 import com.springbatch.mappers.OrderRowMapper;
 import com.springbatch.models.Order;
 import org.springframework.batch.core.Job;
@@ -17,21 +15,15 @@ import org.springframework.batch.core.job.builder.FlowBuilder;
 import org.springframework.batch.core.job.flow.Flow;
 import org.springframework.batch.core.job.flow.JobExecutionDecider;
 import org.springframework.batch.core.job.flow.support.SimpleFlow;
+import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.database.PagingQueryProvider;
-import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
-import org.springframework.batch.item.database.builder.JdbcCursorItemReaderBuilder;
 import org.springframework.batch.item.database.builder.JdbcPagingItemReaderBuilder;
 import org.springframework.batch.item.database.support.SqlPagingQueryProviderFactoryBean;
-import org.springframework.batch.item.file.FlatFileItemReader;
-import org.springframework.batch.item.file.FlatFileItemWriter;
-import org.springframework.batch.item.file.mapping.DefaultLineMapper;
-import org.springframework.batch.item.file.transform.BeanWrapperFieldExtractor;
-import org.springframework.batch.item.file.transform.DelimitedLineAggregator;
-import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
 import org.springframework.batch.item.json.JacksonJsonObjectMarshaller;
 import org.springframework.batch.item.json.builder.JsonFileItemWriterBuilder;
+import org.springframework.batch.item.validator.BeanValidatingItemProcessor;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -41,7 +33,6 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 
 import javax.sql.DataSource;
-import java.util.List;
 
 @SpringBootApplication
 @EnableBatchProcessing
@@ -280,6 +271,13 @@ public class SpringBatchApplication {
                 .build();
     }
 
+    @Bean
+    public ItemProcessor<Order, Order> orderValidatingItemProcessor() {
+        BeanValidatingItemProcessor<Order> itemProcessor = new BeanValidatingItemProcessor<Order>();
+        itemProcessor.setFilter(true);
+        return itemProcessor;
+    }
+
     // JsonFileItemWriterBuilder writes to JSON file on a file system.
     @Bean
     public ItemWriter<Order> itemWriter() {
@@ -323,6 +321,7 @@ public class SpringBatchApplication {
         return this.stepBuilderFactory.get("chunkBasedStep")
                 .<Order, Order>chunk(10)
                 .reader(itemReader())
+                .processor(orderValidatingItemProcessor())
                 .writer(itemWriter()).build();
     }
 
