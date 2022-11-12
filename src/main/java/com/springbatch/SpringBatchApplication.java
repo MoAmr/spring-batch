@@ -30,6 +30,8 @@ import org.springframework.batch.item.file.mapping.DefaultLineMapper;
 import org.springframework.batch.item.file.transform.BeanWrapperFieldExtractor;
 import org.springframework.batch.item.file.transform.DelimitedLineAggregator;
 import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
+import org.springframework.batch.item.json.JacksonJsonObjectMarshaller;
+import org.springframework.batch.item.json.builder.JsonFileItemWriterBuilder;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -278,14 +280,26 @@ public class SpringBatchApplication {
                 .build();
     }
 
+    // JsonFileItemWriterBuilder writes to JSON file on a file system.
     @Bean
+    public ItemWriter<Order> itemWriter() {
+        return new JsonFileItemWriterBuilder<Order>()
+                .jsonObjectMarshaller(new JacksonJsonObjectMarshaller<>())
+                .resource(new FileSystemResource("shipped_orders_output.json"))
+                .name("jsonItemWriter")
+                .build();
+    }
+
+    // JdbcBatchItemWriterBuilder writes to relational database
+    /*@Bean
     public ItemWriter<Order> itemWriter() {
         return new JdbcBatchItemWriterBuilder<Order>()
                 .dataSource(dataSource)
                 .sql(INSERT_ORDER_SQL)
                 .beanMapped()
                 .build();
-    }
+    }*/
+
     // FlatFileItemWriter
     /*@Bean
     public ItemWriter<Order> itemWriter() {

@@ -110,8 +110,16 @@
 
 <img width="697" alt="Available ItemWrites" src="https://user-images.githubusercontent.com/12289319/201493504-92d114df-feea-4058-b99f-b30774e28171.png">
 
+#### JdbcBatchItemWriter:
+
 * The **JdbcBatchItemWriter** provides us with a convenient way to write data from a job to a relational database.
 * The rights are managed by Spring Batch and executed within a transaction, this provides us with some fault tolerance in the case of a failure.
 * One of the weaknesses of this approach is the fact that we are using the ordinal position when we set these parameters, it's very easy to get the order off and to incorrectly set the parameters within the insert statement.
-* When adding **beanMapped** strategy into the **JdbcBatchItemWriterBuilder**, it causes a bean property item sequel parameter source provider to be registered, in a nutshell, what it does, it's going to take those name parameters and look for corresponding field on a pojo, and when it finds it, it's going to use the value of that field to set the parameter within our insert statement. So, it's a lot easier than using those original than using those ordinal positions, this is much more efficient and much less error prone.  
+* When adding **beanMapped** strategy into the **JdbcBatchItemWriterBuilder**, it causes a bean property item sequel parameter source provider to be registered, in a nutshell, what it does, it's going to take those name parameters and look for corresponding field on a pojo, and when it finds it, it's going to use the value of that field to set the parameter within our insert statement. So, it's a lot easier than using those original than using those ordinal positions, this is much more efficient and much less error-prone.
+
+#### JsonFileItemWriterBuilder:
+
+* It's capable of writing JSON to a file on the file system.
+* We use the **JacksonJsonObjectMarshaller** as JSON object marshaller.
+* Jackson is a serialization and deserialization framework for working with JSON in Java, it's able to take a JSON string and turn it into a Java object, and the java object can be turned into a JSON string without much coding being written.
 
