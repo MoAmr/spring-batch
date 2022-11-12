@@ -1,5 +1,6 @@
 package com.springbatch.models;
 
+import javax.validation.constraints.Pattern;
 import java.math.BigDecimal;
 import java.util.Date;
 
@@ -11,6 +12,8 @@ public class Order {
 
     private String lastName;
 
+    // Regex to allow only government emails
+    @Pattern(regexp = ".*\\.gov")
     private String email;
 
     private BigDecimal cost;
