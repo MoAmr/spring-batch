@@ -101,3 +101,14 @@
 * So if you plan to **execute your job with multiple threads**, there's a different item reader implementation that we'll need to use, it's the **JdbcPagingItemReader**.
 * **PageSize** in JdbcPagingItemReader specifies how many items are in a page. so that when this item reader is reading from the database, it reads that amount of items.
 * It's important that our **PageSize also matches our ChunkSize**.
+
+### ItemWriter:
+
+* Standard interface for data output.
+* Writes items in chunks using a transaction.
+* Framework provides out-of-the-box implementations for common data sources.
+
+<img width="697" alt="Available ItemWrites" src="https://user-images.githubusercontent.com/12289319/201493504-92d114df-feea-4058-b99f-b30774e28171.png">
+
+
+
