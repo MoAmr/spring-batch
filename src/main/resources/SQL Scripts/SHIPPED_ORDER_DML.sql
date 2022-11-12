@@ -1,13 +1,4 @@
-create table  batch_repo.SHIPPED_ORDER (
-	order_id INT,
-	first_name VARCHAR(50),
-	last_name VARCHAR(50),
-	email VARCHAR(50),
-	cost VARCHAR(50),
-	item_id VARCHAR(40),
-	item_name VARCHAR(15),
-	ship_date DATE
-);
+-- Inserting into table batch_repo.SHIPPED_ORDER
 
 insert into  batch_repo.SHIPPED_ORDER (order_id, first_name, last_name, email, cost, item_id, item_name, ship_date) values (1, 'Doro', 'Odda', 'dodda0@jugem.jp', '50.53', '63aa1159-8ec4-4154-9b4e-620e67f4bdc5', 'Stretch Pants', '2019-02-22');
 insert into  batch_repo.SHIPPED_ORDER (order_id, first_name, last_name, email, cost, item_id, item_name, ship_date) values (2, 'Cyb', 'Dedham', 'cdedham1@elpais.com', '15.01', 'dc64ab3d-154c-4059-af52-494549a044e7', 'Ski Coat', '2019-07-25');

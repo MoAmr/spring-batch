@@ -20,6 +20,7 @@ import org.springframework.batch.core.job.flow.support.SimpleFlow;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.database.PagingQueryProvider;
+import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
 import org.springframework.batch.item.database.builder.JdbcCursorItemReaderBuilder;
 import org.springframework.batch.item.database.builder.JdbcPagingItemReaderBuilder;
 import org.springframework.batch.item.database.support.SqlPagingQueryProviderFactoryBean;
@@ -50,6 +51,10 @@ public class SpringBatchApplication {
 
     public static String ORDER_SQL = "select order_id, first_name, last_name, email, cost, item_id, item_name, ship_date "
             + "from SHIPPED_ORDER order by order_id";
+
+    public static String INSERT_ORDER_SQL = "insert into "
+            + "SHIPPED_ORDER_OUTPUT(order_id, first_name, last_name, email, item_id, item_name, cost, ship_date)"
+            + " values(?,?,?,?,?,?,?,?)";
 
     @Autowired
     public JobBuilderFactory jobBuilderFactory;
@@ -275,6 +280,15 @@ public class SpringBatchApplication {
 
     @Bean
     public ItemWriter<Order> itemWriter() {
+        return new JdbcBatchItemWriterBuilder<Order>()
+                .dataSource(dataSource)
+                .sql(INSERT_ORDER_SQL)
+                .itemPreparedStatementSetter(new OrderItemPreparedStatementSetter())
+                .build();
+    }
+    // FlatFileItemWriter
+    /*@Bean
+    public ItemWriter<Order> itemWriter() {
         FlatFileItemWriter<Order> itemWriter = new FlatFileItemWriter<Order>();
 
         itemWriter.setResource(new FileSystemResource("shipped_orders_output.csv"));
@@ -288,7 +302,7 @@ public class SpringBatchApplication {
 
         itemWriter.setLineAggregator(aggregator);
         return itemWriter;
-    }
+    }*/
 
     @Bean
     public Step chunkBasedStep() throws Exception {
