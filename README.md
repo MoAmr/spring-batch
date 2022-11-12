@@ -110,5 +110,8 @@
 
 <img width="697" alt="Available ItemWrites" src="https://user-images.githubusercontent.com/12289319/201493504-92d114df-feea-4058-b99f-b30774e28171.png">
 
+* The **JdbcBatchItemWriter** provides us with a convenient way to write data from a job to a relational database.
+* The rights are managed by Spring Batch and executed within a transaction, this provides us with some fault tolerance in the case of a failure.
+* One of the weaknesses of this approach is the fact that we are using the ordinal position when we set these parameters, it's very easy to get the order off and to incorrectly set the parameters within the insert statement.
 
 
