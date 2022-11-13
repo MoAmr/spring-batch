@@ -6,6 +6,7 @@ import com.springbatch.listeners.FlowersSelectionStepExecutionListener;
 import com.springbatch.mappers.OrderRowMapper;
 import com.springbatch.models.Order;
 import com.springbatch.models.TrackedOrder;
+import com.springbatch.processors.FreeShippingItemProcessor;
 import com.springbatch.processors.TrackedOrderItemProcessor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -276,9 +277,14 @@ public class SpringBatchApplication {
     }
 
     @Bean
+    public ItemProcessor<TrackedOrder, TrackedOrder> freeShippingItemProcessor() {
+        return new FreeShippingItemProcessor();
+    }
+
+    @Bean
     public ItemProcessor<Order, TrackedOrder> compositeItemProcessor() {
         return new CompositeItemProcessorBuilder<Order, TrackedOrder>()
-                .delegates(orderValidatingItemProcessor(), trackedOrderItemProcessor())
+                .delegates(orderValidatingItemProcessor(), trackedOrderItemProcessor(), freeShippingItemProcessor())
                 .build();
     }
 
