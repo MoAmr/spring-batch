@@ -4,7 +4,6 @@ import com.springbatch.exceptions.OrderProcessingException;
 import com.springbatch.jobDeciders.DeliveryDecider;
 import com.springbatch.jobDeciders.ReceiptDecider;
 import com.springbatch.listeners.CustomRetryListener;
-import com.springbatch.listeners.CustomSkipListener;
 import com.springbatch.listeners.FlowersSelectionStepExecutionListener;
 import com.springbatch.mappers.OrderRowMapper;
 import com.springbatch.models.Order;
@@ -25,11 +24,9 @@ import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.database.PagingQueryProvider;
+import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
 import org.springframework.batch.item.database.builder.JdbcPagingItemReaderBuilder;
 import org.springframework.batch.item.database.support.SqlPagingQueryProviderFactoryBean;
-import org.springframework.batch.item.json.JacksonJsonObjectMarshaller;
-import org.springframework.batch.item.json.builder.JsonFileItemWriterBuilder;
-import org.springframework.batch.item.support.builder.ClassifierCompositeItemProcessorBuilder;
 import org.springframework.batch.item.support.builder.CompositeItemProcessorBuilder;
 import org.springframework.batch.item.validator.BeanValidatingItemProcessor;
 import org.springframework.batch.repeat.RepeatStatus;
@@ -37,8 +34,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.core.task.TaskExecutor;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import javax.sql.DataSource;
 
@@ -53,9 +51,13 @@ public class SpringBatchApplication {
     public static String ORDER_SQL = "select order_id, first_name, last_name, email, cost, item_id, item_name, ship_date "
             + "from SHIPPED_ORDER order by order_id";
 
-    public static String INSERT_ORDER_SQL = "insert into "
+    /*public static String INSERT_ORDER_SQL = "insert into "
             + "SHIPPED_ORDER_OUTPUT(order_id, first_name, last_name, email, item_id, item_name, cost, ship_date)"
-            + " values(:orderId, :firstName, :lastName, :email, :itemId, :itemName, :cost, :shipDate)";
+            + " values(:orderId, :firstName, :lastName, :email, :itemId, :itemName, :cost, :shipDate)";*/
+
+    public static String INSERT_ORDER_SQL = "insert into "
+            + "TRACKED_ORDER(order_id, first_name, last_name, email, item_id, item_name, cost, ship_date, tracking_number, free_shipping)"
+            + " values(:orderId, :firstName, :lastName, :email, :itemId, :itemName, :cost, :shipDate, :trackingNumber, :freeShipping)";
 
     @Autowired
     public JobBuilderFactory jobBuilderFactory;
@@ -276,6 +278,7 @@ public class SpringBatchApplication {
                 .queryProvider(queryProvider())
                 .rowMapper(new OrderRowMapper())
                 .pageSize(10)
+                .saveState(false)
                 .build();
     }
 
@@ -304,24 +307,24 @@ public class SpringBatchApplication {
     }
 
     // JsonFileItemWriterBuilder writes to JSON file on a file system.
-    @Bean
+    /*@Bean
     public ItemWriter<TrackedOrder> itemWriter() {
         return new JsonFileItemWriterBuilder<TrackedOrder>()
                 .jsonObjectMarshaller(new JacksonJsonObjectMarshaller<>())
                 .resource(new FileSystemResource("shipped_orders_output.json"))
                 .name("jsonItemWriter")
                 .build();
-    }
+    }*/
 
     // JdbcBatchItemWriterBuilder writes to relational database
-    /*@Bean
-    public ItemWriter<Order> itemWriter() {
-        return new JdbcBatchItemWriterBuilder<Order>()
+    @Bean
+    public ItemWriter<TrackedOrder> itemWriter() {
+        return new JdbcBatchItemWriterBuilder<TrackedOrder>()
                 .dataSource(dataSource)
                 .sql(INSERT_ORDER_SQL)
                 .beanMapped()
                 .build();
-    }*/
+    }
 
     // FlatFileItemWriter
     /*@Bean
@@ -376,6 +379,14 @@ public class SpringBatchApplication {
                 .writer(itemWriter()).build();
     }*/
 
+    @Bean
+    public TaskExecutor taskExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(2);
+        executor.setMaxPoolSize(10);
+        return executor;
+    }
+
     // Configuring a chunkBasedStep for retries
     @Bean
     public Step chunkBasedStep() throws Exception {
@@ -387,7 +398,9 @@ public class SpringBatchApplication {
                 .retry(OrderProcessingException.class)
                 .retryLimit(3)
                 .listener(new CustomRetryListener())
-                .writer(itemWriter()).build();
+                .writer(itemWriter())
+                .taskExecutor(taskExecutor())
+                .build();
     }
 
     @Bean
