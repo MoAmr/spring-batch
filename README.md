@@ -148,3 +148,11 @@
 #### CompositeItemProcessor:
 
 * Using a **CompositeItemProcessor**, we were able to conjoin the processing that was found within two individual item processors and that combined logic was abel to be applied within the flow of our job.
+
+### Ship Logic:
+
+* We can configure a step to allow for skips.
+* Skips allow us to continue processing when a particular item causes an exception to be thrown.
+* The job will just ignore the exception and continue processing.
+* Skips are a great way to make batch jobs more resilient in non-critical jobs.
+* In some instances within a job, an exception may occur. However, the job should not be failed. Spring Batch allows for this sort of behavior through a concept known as **skips**.

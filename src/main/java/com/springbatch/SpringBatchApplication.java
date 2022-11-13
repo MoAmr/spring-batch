@@ -1,7 +1,9 @@
 package com.springbatch;
 
+import com.springbatch.exceptions.OrderProcessingException;
 import com.springbatch.jobDeciders.DeliveryDecider;
 import com.springbatch.jobDeciders.ReceiptDecider;
+import com.springbatch.listeners.CustomSkipListener;
 import com.springbatch.listeners.FlowersSelectionStepExecutionListener;
 import com.springbatch.mappers.OrderRowMapper;
 import com.springbatch.models.Order;
@@ -365,6 +367,10 @@ public class SpringBatchApplication {
                 .<Order, TrackedOrder>chunk(10)
                 .reader(itemReader())
                 .processor(compositeItemProcessor())
+                .faultTolerant()
+                .skip(OrderProcessingException.class)
+                .skipLimit(5)
+                .listener(new CustomSkipListener())
                 .writer(itemWriter()).build();
     }
 
