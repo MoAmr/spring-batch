@@ -25,6 +25,8 @@ import org.springframework.batch.item.database.builder.JdbcPagingItemReaderBuild
 import org.springframework.batch.item.database.support.SqlPagingQueryProviderFactoryBean;
 import org.springframework.batch.item.json.JacksonJsonObjectMarshaller;
 import org.springframework.batch.item.json.builder.JsonFileItemWriterBuilder;
+import org.springframework.batch.item.support.builder.ClassifierCompositeItemProcessorBuilder;
+import org.springframework.batch.item.support.builder.CompositeItemProcessorBuilder;
 import org.springframework.batch.item.validator.BeanValidatingItemProcessor;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -274,6 +276,13 @@ public class SpringBatchApplication {
     }
 
     @Bean
+    public ItemProcessor<Order, TrackedOrder> compositeItemProcessor() {
+        return new CompositeItemProcessorBuilder<Order, TrackedOrder>()
+                .delegates(orderValidatingItemProcessor(), trackedOrderItemProcessor())
+                .build();
+    }
+
+    @Bean
     public ItemProcessor<Order, TrackedOrder> trackedOrderItemProcessor() {
         return new TrackedOrderItemProcessor();
     }
@@ -333,12 +342,23 @@ public class SpringBatchApplication {
                 .writer(itemWriter()).build();
     }*/
 
-    @Bean
+    // processor here is custom trackedOrderItemProcessor
+    /*@Bean
     public Step chunkBasedStep() throws Exception {
         return this.stepBuilderFactory.get("chunkBasedStep")
                 .<Order, TrackedOrder>chunk(10)
                 .reader(itemReader())
                 .processor(trackedOrderItemProcessor())
+                .writer(itemWriter()).build();
+    }*/
+
+    // Chaining itemProcessors
+    @Bean
+    public Step chunkBasedStep() throws Exception {
+        return this.stepBuilderFactory.get("chunkBasedStep")
+                .<Order, TrackedOrder>chunk(10)
+                .reader(itemReader())
+                .processor(compositeItemProcessor())
                 .writer(itemWriter()).build();
     }
 
