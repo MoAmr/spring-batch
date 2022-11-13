@@ -162,3 +162,8 @@
 * Retries can be configured to automatically retry a step in an attempt to recover from an exception.
 * This capability increases the resilience of our job and can help in situations where the job could potentially recover from the exception it experienced.
 * This capability is very beneficial in situations where some external resources lie a service may be experiencing sporadic issues.
+
+### Multi-threaded jobs;
+
+* Switching to multi-threaded job should not be taken likely because it comes with trade-offs.
+* Multi-threaded jobs inherently lose the capability to restart.
