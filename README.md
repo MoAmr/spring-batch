@@ -144,3 +144,7 @@
 * To determine if an item is valid, the **BeanValidatingItemProcessor** consults JSR 380 validation annotations placed on a bean.
 * On this processor, we are able to set whether the processor will **filter** or not, in our case, we would like to filter, we are going to continue processing, we are just **not going to process those items that cannot pass the validation enforced by this item processor**, so we will not throw an error, we will continue processing.
 * The alternative is for the processor to throw an error when there is a validation exception.
+
+#### CompositeItemProcessor:
+
+* Using a **CompositeItemProcessor**, we were able to conjoin the processing that was found within two individual item processors and that combined logic was abel to be applied within the flow of our job.
