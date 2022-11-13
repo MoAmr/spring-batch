@@ -5,6 +5,8 @@ import com.springbatch.jobDeciders.ReceiptDecider;
 import com.springbatch.listeners.FlowersSelectionStepExecutionListener;
 import com.springbatch.mappers.OrderRowMapper;
 import com.springbatch.models.Order;
+import com.springbatch.models.TrackedOrder;
+import com.springbatch.processors.TrackedOrderItemProcessor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.StepExecutionListener;
@@ -272,6 +274,11 @@ public class SpringBatchApplication {
     }
 
     @Bean
+    public ItemProcessor<Order, TrackedOrder> trackedOrderItemProcessor() {
+        return new TrackedOrderItemProcessor();
+    }
+
+    @Bean
     public ItemProcessor<Order, Order> orderValidatingItemProcessor() {
         BeanValidatingItemProcessor<Order> itemProcessor = new BeanValidatingItemProcessor<Order>();
         itemProcessor.setFilter(true);
@@ -280,8 +287,8 @@ public class SpringBatchApplication {
 
     // JsonFileItemWriterBuilder writes to JSON file on a file system.
     @Bean
-    public ItemWriter<Order> itemWriter() {
-        return new JsonFileItemWriterBuilder<Order>()
+    public ItemWriter<TrackedOrder> itemWriter() {
+        return new JsonFileItemWriterBuilder<TrackedOrder>()
                 .jsonObjectMarshaller(new JacksonJsonObjectMarshaller<>())
                 .resource(new FileSystemResource("shipped_orders_output.json"))
                 .name("jsonItemWriter")
@@ -316,12 +323,22 @@ public class SpringBatchApplication {
         return itemWriter;
     }*/
 
-    @Bean
+    // processor here is orderValidatingItemProcessor
+    /*@Bean
     public Step chunkBasedStep() throws Exception {
         return this.stepBuilderFactory.get("chunkBasedStep")
                 .<Order, Order>chunk(10)
                 .reader(itemReader())
                 .processor(orderValidatingItemProcessor())
+                .writer(itemWriter()).build();
+    }*/
+
+    @Bean
+    public Step chunkBasedStep() throws Exception {
+        return this.stepBuilderFactory.get("chunkBasedStep")
+                .<Order, TrackedOrder>chunk(10)
+                .reader(itemReader())
+                .processor(trackedOrderItemProcessor())
                 .writer(itemWriter()).build();
     }
 
