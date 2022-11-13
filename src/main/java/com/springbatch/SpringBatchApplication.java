@@ -3,6 +3,7 @@ package com.springbatch;
 import com.springbatch.exceptions.OrderProcessingException;
 import com.springbatch.jobDeciders.DeliveryDecider;
 import com.springbatch.jobDeciders.ReceiptDecider;
+import com.springbatch.listeners.CustomRetryListener;
 import com.springbatch.listeners.CustomSkipListener;
 import com.springbatch.listeners.FlowersSelectionStepExecutionListener;
 import com.springbatch.mappers.OrderRowMapper;
@@ -361,7 +362,8 @@ public class SpringBatchApplication {
     }*/
 
     // Chaining itemProcessors
-    @Bean
+    // Configuring a chunkBasedStep for skips
+    /*@Bean
     public Step chunkBasedStep() throws Exception {
         return this.stepBuilderFactory.get("chunkBasedStep")
                 .<Order, TrackedOrder>chunk(10)
@@ -371,6 +373,20 @@ public class SpringBatchApplication {
                 .skip(OrderProcessingException.class)
                 .skipLimit(5)
                 .listener(new CustomSkipListener())
+                .writer(itemWriter()).build();
+    }*/
+
+    // Configuring a chunkBasedStep for retries
+    @Bean
+    public Step chunkBasedStep() throws Exception {
+        return this.stepBuilderFactory.get("chunkBasedStep")
+                .<Order, TrackedOrder>chunk(10)
+                .reader(itemReader())
+                .processor(compositeItemProcessor())
+                .faultTolerant()
+                .retry(OrderProcessingException.class)
+                .retryLimit(3)
+                .listener(new CustomRetryListener())
                 .writer(itemWriter()).build();
     }
 

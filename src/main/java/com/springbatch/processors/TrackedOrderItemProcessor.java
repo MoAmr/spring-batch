@@ -19,7 +19,7 @@ public class TrackedOrderItemProcessor implements ItemProcessor<Order, TrackedOr
 
     private String getTrackingNumber() throws OrderProcessingException {
 
-        if (Math.random() < .03) {
+        if (Math.random() < .05) {
             throw new OrderProcessingException();
         }
 

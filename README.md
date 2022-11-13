@@ -156,3 +156,9 @@
 * The job will just ignore the exception and continue processing.
 * Skips are a great way to make batch jobs more resilient in non-critical jobs.
 * In some instances within a job, an exception may occur. However, the job should not be failed. Spring Batch allows for this sort of behavior through a concept known as **skips**.
+
+### Retry Steps:
+
+* Retries can be configured to automatically retry a step in an attempt to recover from an exception.
+* This capability increases the resilience of our job and can help in situations where the job could potentially recover from the exception it experienced.
+* This capability is very beneficial in situations where some external resources lie a service may be experiencing sporadic issues.
