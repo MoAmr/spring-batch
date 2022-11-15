@@ -167,3 +167,13 @@
 
 * Switching to multi-threaded job should not be taken likely because it comes with trade-offs.
 * Multi-threaded jobs inherently lose the capability to restart.
+
+### Scheduling Job Execution:
+
+* There are three primary strategies for launching the execution of Spring batch jobs:
+  1. **Spring Boot**: Includes the job launcher command line runner that allows us to execute jobs via an executable jar from the command line. Through the application.properties file and the parameters used to launch the jar, we can control what jobs are launched and the job parameters they use. This strategy can be used with a cron on the operating system to schedule executions of job instances.
+  2. **Scheduler**: We can also use an enterprise scheduler such as Quartz to launch a Spring Batch Job. By design, the Spring Framework does not include a scheduler.
+  3. **REST API**: We can set up a regular Spring MVC controller and launch the job in response to an HTTP request, this strategy is effective when jobs must be kicked off on demand or an ad hoc basis.
+
+* To stop the Spring Boot from launching our jobs upon the initial bootstrap of the application, we need to mark the job enabled flag to **false** in the **application.properties** file like this: ```spring.batch.job.enabled=false```
+* 
