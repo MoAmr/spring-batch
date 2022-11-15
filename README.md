@@ -180,3 +180,9 @@
 * **Trigger** requires **two dependencies** to be satisfied, include a **Job** and a **Schedule**.
 * The ```@Scheduled``` annotation allows a chron to be specified that will cause a job execution to be triggered per the specified schedule. 
 * Spring Boot's **JobLauncherCommandLineRunner** will execute all jobs found in the application context on startup or can be configured to launch specific jobs using the ```spring.batch.job.names``` property.
+
+### Important for Enabling the Batches:
+
+* Make sure to add the **main method** in either the **SpringBatchApplication** or **ScheduleSpringBatchApplication** classes to enable batch processing:
+  1. **SpringBatchApplication** implements chunk based steps and their respective jobs.
+  2. **ScheduleSpringBatchApplication** explains how to schedule a spring batch job.
