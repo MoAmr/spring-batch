@@ -176,4 +176,7 @@
   3. **REST API**: We can set up a regular Spring MVC controller and launch the job in response to an HTTP request, this strategy is effective when jobs must be kicked off on demand or an ad hoc basis.
 
 * To stop the Spring Boot from launching our jobs upon the initial bootstrap of the application, we need to mark the job enabled flag to **false** in the **application.properties** file like this: ```spring.batch.job.enabled=false```
-* 
+* The creators of Spring batch intentionally decided to make the scheduler agnostic so that any scheduling framework can be used to schedule jobs with Spring Batch.
+* **Trigger** requires **two dependencies** to be satisfied, include a **Job** and a **Schedule**.
+* The ```@Scheduled``` annotation allows a chron to be specified that will cause a job execution to be triggered per the specified schedule. 
+* Spring Boot's **JobLauncherCommandLineRunner** will execute all jobs found in the application context on startup or can be configured to launch specific jobs using the ```spring.batch.job.names``` property.
